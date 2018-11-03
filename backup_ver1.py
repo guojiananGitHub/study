@@ -1,20 +1,42 @@
 import os
 import time
+import zipfile
 
-#   1.需要备份的目录由一个列表指定
-source = [r'E:\test']
 
-#   2.主备份目录
-target_dir = r'F:\backup'
+def get_zip_file(input_path, result):
+    """
+    对目录进行深度优先遍历
+    :param input_path:
+    :param result:
+    :return:
+    """
+    files = os.listdir(input_path)
+    for file in files:
+        if os.path.isdir(input_path + '/' + file):
+            get_zip_file(input_path + '/' + file, result)
+        else:
+            result.append(input_path + '/' + file)
 
-#   3.zip存档名称
-target = target_dir + time.strftime('%Y%m%d%H%M%S') + '.zip'
 
-#   4.压缩命令
-zip_command = "zip -qr '%s' %s" % (target, ' '.join(source))
+def zip_file_path(input_path, output_path, output_name):
+    """
+    压缩文件
+    :param input_path:
+    :param output_path:
+    :param output_name:
+    :return:
+    """
+    f = zipfile.ZipFile(output_path + '/' + output_name, 'w', zipfile.ZIP_DEFLATED, )
+    filelists = []
+    get_zip_file(input_path, filelists)
+    for file in filelists:
+        f.write(file)
+    f.close()
+    return output_path + r"/" + output_name
 
-#   5.执行命令
-if os.system(zip_command) == 0:
-    print('successful backup to', target)
-else:
-    print('Backup Failed')
+
+#   zip存档名称
+target = time.strftime('%Y%m%d%H%M%S') + '.zip'
+
+if __name__ == '__main__':
+    zip_file_path('E:\\test', 'F:\\backup', target)
